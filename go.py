@@ -77,7 +77,7 @@ class WebExplorer:
         self.printOpt('find_elements | End | ' + str(timePoint))
         len1 = self.research.elementsList.__len__()
         pozycja = int(len1 / 3)
-        self.printOpt('pozycja = ' + str(pozycja) + '/' + str(len1) + '\r\n' + 
+        self.printOpt('losowy element nr ' + str(pozycja) + '/' + str(len1) + '\r\n' + 
             self.research.elementsList[pozycja].get_attribute('innerHTML')[:100].strip())        
         self.SaveToFile()
         browser.close()
@@ -90,7 +90,7 @@ class WebExplorer:
         procElem.innerText = elem.get_attribute('innerText').strip()        
         if procElem.tagName == 'a':
             procElem.href = elem.get_attribute('href').strip()
-            if self.cfg['Domain'] in procElem.href and '#' not in procElem.href:
+            if self.cfg['Domain'] in procElem.href: # and '#' not in procElem.href:
                 if procElem.href not in self.links:
                     self.links.append(procElem.href)
         nestedElements = elem.find_elements_by_tag_name('*')
