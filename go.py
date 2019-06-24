@@ -40,12 +40,14 @@ class Element:
     hasChildren = False
     tagName = ''
     innerHtml = ''
+    innerText = ''
+    href = ''
     
 class Research:
     def __init__(self):
         self.startDate = datetime.datetime.now()
         self.error = ''
-        self.elementsList = None
+        self.elementsList = []
         self.ExtractedElements = []
 
 class WebExplorer:    
@@ -54,58 +56,81 @@ class WebExplorer:
         self.verbose = verbose
         self.research = Research()
         self.cfg = self.appContext.GetConfiguration()
+        self.links = []        
 
     def Go(self):
         opts = Options()
         opts.set_headless()
         assert opts.headless
-        startTime = datetime.datetime.now()
-        self.printOpt(startTime)
+        timePoint = datetime.datetime.now()
+        self.printOpt('browser.get | Start | ' + str(timePoint))
 
         browser = Firefox(options=opts)
         browser.get(self.cfg['Url'])
         # assert self.cfg['SiteName'] in browser.title
-
-        self.research.elementsList = browser.find_elements_by_tag_name(self.cfg['Tag']);
-        
+        timePoint = datetime.datetime.now() - timePoint
+        self.printOpt('browser.get | End | ' + str(timePoint))
+        timePoint = datetime.datetime.now()
+        self.printOpt('find_elements | Start | ' + str(timePoint))
+        self.research.elementsList = browser.find_elements_by_tag_name(self.cfg['Tag']);        
+        timePoint = datetime.datetime.now() - timePoint
+        self.printOpt('find_elements | End | ' + str(timePoint))
         len1 = self.research.elementsList.__len__()
-        # self.printOpt(self.research.elementsList[len1 % 3].get_attribute('innerHTML'))        
+        pozycja = int(len1 / 3)
+        self.printOpt('pozycja = ' + str(pozycja) + '/' + str(len1) + '\r\n' + 
+            self.research.elementsList[pozycja].get_attribute('innerHTML')[:100].strip())        
         self.SaveToFile()
+        browser.close()
         pass
 
-    def ProcessElement(self, element):
-        pass
-
+    def ProcessElement(self, elem):
+        procElem = Element()
+        procElem.tagName = elem.tag_name
+        procElem.innerHtml = elem.get_attribute('innerHTML').strip()
+        procElem.innerText = elem.get_attribute('innerText').strip()        
+        if procElem.tagName == 'a':
+            procElem.href = elem.get_attribute('href').strip()
+            if self.cfg['Domain'] in procElem.href and '#' not in procElem.href:
+                if procElem.href not in self.links:
+                    self.links.append(procElem.href)
+        nestedElements = elem.find_elements_by_tag_name('*')
+        procElem.hasChildren = nestedElements.__len__() > 0
+        return procElem
+        
     def SaveToFile(self):
         len1 = self.research.elementsList.__len__()
-        self.printOpt('len = ' + str(len1))        
-        now = datetime.datetime.now()
-        self.printOpt(now)
-        f = open(str(datetime.datetime.now()) + '.txt', 'w+')
+        timePoint = datetime.datetime.now()
+        self.printOpt('SaveToFile | Start | ' + str(timePoint))
+        f = open('log_' + str(timePoint) + '.txt', 'w+')
         
         for i in range(len1 -1):
             try:
                 # f.write(str(self.research.elementsList[i].get_attribute('innerHTML') + "\r\n"))
-                elem = Element()
-                elem.tagName = self.research.elementsList[i].tag_name
-                elem.innerHtml = self.research.elementsList[i].get_attribute('innerHTML').strip()
-                self.research.ExtractedElements.append(elem)
-                self.printOpt(elem.tagName)
-                f.write(str(elem.innerHtml))
+                tempEmelent = self.ProcessElement(self.research.elementsList[i])
+                self.research.ExtractedElements.append(tempEmelent)
+                # self.printOpt(elem.tagName)
+                f.write(tempEmelent.tagName + ';' + str(tempEmelent.hasChildren) + ';' + tempEmelent.innerText[:100] + '\r\n')
             except:
                 self.printOpt('error\r\n')
+
         f.close()
+        timePoint = datetime.datetime.now() - timePoint
+        self.printOpt('SaveToFile | End | ' + str(timePoint))
 
     def printOpt(self, text):
         if self.verbose:
             print(text)
-pass
 
 if __name__ == "__main__":    
     appContext = AppContext('config.cfg')
-    program = WebExplorer(appContext, True).Go()
+    appContext.GetConfiguration()
+    print('URL = ' + appContext.data['Url'])
+    for x in range(1):
+        timePoint = datetime.datetime.now()
+        print('------------------------------------')
+        print('Loop | Start | ' + str(x))                
+        program = WebExplorer(appContext, True).Go()
+        timePoint = datetime.datetime.now() - timePoint
+        print('Loop | End | ' + str(timePoint))
     pass
     
- 
-
-
