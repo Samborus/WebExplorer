@@ -64,10 +64,10 @@ class WebExplorer:
         assert opts.headless
         timePoint = datetime.datetime.now()
         self.printOpt('browser.get | Start | ' + str(timePoint))
-
         browser = Firefox(options=opts)
         browser.get(self.cfg['Url'])
         # assert self.cfg['SiteName'] in browser.title
+        self.links.append(browser.current_url)
         timePoint = datetime.datetime.now() - timePoint
         self.printOpt('browser.get | End | ' + str(timePoint))
         timePoint = datetime.datetime.now()
@@ -90,7 +90,7 @@ class WebExplorer:
         procElem.innerText = elem.get_attribute('innerText').strip()        
         if procElem.tagName == 'a':
             procElem.href = elem.get_attribute('href').strip()
-            if self.cfg['Domain'] in procElem.href: # and '#' not in procElem.href:
+            if self.cfg['Domain'] in procElem.href and '#' not in procElem.href:
                 if procElem.href not in self.links:
                     self.links.append(procElem.href)
         nestedElements = elem.find_elements_by_tag_name('*')
@@ -120,17 +120,4 @@ class WebExplorer:
     def printOpt(self, text):
         if self.verbose:
             print(text)
-
-if __name__ == "__main__":    
-    appContext = AppContext('config.cfg')
-    appContext.GetConfiguration()
-    print('URL = ' + appContext.data['Url'])
-    for x in range(1):
-        timePoint = datetime.datetime.now()
-        print('------------------------------------')
-        print('Loop | Start | ' + str(x))                
-        program = WebExplorer(appContext, True).Go()
-        timePoint = datetime.datetime.now() - timePoint
-        print('Loop | End | ' + str(timePoint))
-    pass
     
