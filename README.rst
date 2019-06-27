@@ -1,2 +1,2 @@
 Script purpose:
-Prepare data matrix extracted from website.
+Prepare data matrix based on website DOM elements.
