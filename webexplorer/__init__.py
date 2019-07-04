@@ -1,6 +1,8 @@
 from core import *
+# from centroid import *
 
 if __name__ == "__main__":    
+    # ComputeShow()
     appContext = AppContext('config.cfg')
     appContext.GetConfiguration()
     print('URL = ' + appContext.data['Url'])

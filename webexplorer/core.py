@@ -42,6 +42,7 @@ class Element:
     innerHtml = ''
     innerText = ''
     href = ''
+    location = ()
     
 class Research:
     def __init__(self):
@@ -88,6 +89,7 @@ class WebExplorer:
         procElem.tagName = elem.tag_name
         procElem.innerHtml = elem.get_attribute('innerHTML').strip()
         procElem.innerText = elem.get_attribute('innerText').strip()        
+        
         if procElem.tagName == 'a':
             procElem.href = elem.get_attribute('href').strip()
             if self.cfg['Domain'] in procElem.href and '#' not in procElem.href:
@@ -95,6 +97,8 @@ class WebExplorer:
                     self.links.append(procElem.href)
         nestedElements = elem.find_elements_by_tag_name('*')
         procElem.hasChildren = nestedElements.__len__() > 0
+        if procElem.hasChildren:
+            procElem.location = elem.location
         return procElem
         
     def SaveToFile(self):
