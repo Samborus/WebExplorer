@@ -9,6 +9,7 @@ from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 import datetime
 import json
+import pickle
 
 class Logger:
     def __init__(self, logfilePath):
@@ -77,15 +78,16 @@ class WebExplorer:
         timePoint = datetime.datetime.now() - timePoint
         self.printOpt('find_elements | End | ' + str(timePoint))
         len1 = self.research.elementsList.__len__()
-        pozycja = int(len1 / 3)
-        self.printOpt('losowy element nr ' + str(pozycja) + '/' + str(len1) + '\r\n' + 
-            self.research.elementsList[pozycja].get_attribute('innerHTML')[:100].strip())        
+        # pozycja = int(len1 / 3)
+        # self.printOpt('losowy element nr ' + str(pozycja) + '/' + str(len1) + '\r\n' + 
+        #     self.research.elementsList[pozycja].get_attribute('innerHTML')[:100].strip())        
         self.SaveToFile()
         browser.close()
         pass
 
     def ProcessElement(self, elem):
         procElem = Element()
+        procElem.Id = elem._id
         procElem.tagName = elem.tag_name
         procElem.innerHtml = elem.get_attribute('innerHTML').strip()
         procElem.innerText = elem.get_attribute('innerText').strip()        
@@ -96,9 +98,8 @@ class WebExplorer:
                 if procElem.href not in self.links:
                     self.links.append(procElem.href)
         nestedElements = elem.find_elements_by_tag_name('*')
-        procElem.hasChildren = nestedElements.__len__() > 0
-        if procElem.hasChildren:
-            procElem.location = elem.location
+        procElem.Childrencount = nestedElements.__len__()
+        procElem.location = elem.location
         return procElem
         
     def SaveToFile(self):
@@ -111,9 +112,10 @@ class WebExplorer:
             try:
                 # f.write(str(self.research.elementsList[i].get_attribute('innerHTML') + "\r\n"))
                 tempEmelent = self.ProcessElement(self.research.elementsList[i])
-                self.research.ExtractedElements.append(tempEmelent)
-                # self.printOpt(elem.tagName)
-                f.write(tempEmelent.tagName + ';' + str(tempEmelent.hasChildren) + ';' + tempEmelent.innerText[:100] + '\r\n')
+                if tempEmelent.location['x']  != 0 and tempEmelent.location['y'] != 0:
+                    self.research.ExtractedElements.append(tempEmelent)
+                    f.write(tempEmelent.Id + ';' + tempEmelent.tagName + ';' + str(tempEmelent.Childrencount) + ';' + 
+                        tempEmelent.innerText[:100] + '\r\n')
             except:
                 self.printOpt('error\r\n')
 
@@ -124,4 +126,14 @@ class WebExplorer:
     def printOpt(self, text):
         if self.verbose:
             print(text)
+
+    def SavePickle(self, obj):
+        with open('outfile', 'wb') as fp:
+            pickle.dump(obj, fp)
+
+    def LoadPickle(self):
+        with open ('outfile', 'rb') as fp:
+            itemlist = pickle.load(fp)
+        return itemlist
+
     

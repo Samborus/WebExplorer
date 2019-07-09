@@ -19,4 +19,5 @@ if __name__ == "__main__":
             pass
         print('Loop | End | ' + str(timePoint))
         print(*program.links, sep = '\n')
-    pass
+    
+
