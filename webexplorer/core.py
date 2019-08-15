@@ -112,7 +112,7 @@ class WebExplorer:
         len1 = self.research.elementsList.__len__()
         timePoint = datetime.datetime.now()
         self.printOpt('SaveToFile | Start | ' + str(timePoint))
-        f = open('logs/log_' + str(timePoint) + '.txt', 'w+')
+        f = open('logs/log_' + str(timePoint) + '.csv', 'w+')
         
         for i in range(len1 -1):
             try:
