@@ -44,6 +44,11 @@ class Element:
     href = ''
     location = ()
     className = ''
+    hasCurrencySIgn = False
+    hasPercantage = False
+    hasNumber = False
+    hasPriceInName = False
+    isLink = False
     
 class Research:
     def __init__(self):
@@ -97,23 +102,31 @@ class WebExplorer:
             return None
 
         procElem.tagName = elem.tag_name
-        procElem.innerText = elem.get_attribute('innerText').strip()        
-        procElem.className = elem.get_attribute('className')
+        procElem.innerText = elem.get_attribute('innerText').strip().lower()        
+        procElem.className = elem.get_attribute('className').lower()
         if procElem.tagName == 'a':
             procElem.href = elem.get_attribute('href').strip()
             if self.cfg['Domain'] in procElem.href and '#' not in procElem.href:
                 if procElem.href not in self.links:
                     self.links.append(procElem.href)        
-        
-        
+        if '%' in procElem.innerText:
+            procElem.hasPercantage = True
+        if 'zł' in procElem.innerText or 'pln' in procElem.innerText or 'zł' in procElem.innerText:
+            procElem.hasCurrencySIgn = True
+
+        procElem.hasNumber = any(char.isdigit() for char in procElem.innerText)
+        procElem.hasPriceInName = 'price' in procElem.className
+        if procElem.tagName == 'a' and procElem.href != '':
+            procElem.isLink = True
+
         return procElem
         
     def SaveToFile(self):
         len1 = self.research.elementsList.__len__()
         timePoint = datetime.datetime.now()
         self.printOpt('SaveToFile | Start | ' + str(timePoint))
-        f = open('logs/log_' + str(timePoint) + '.csv', 'w+')
-        
+        f = open('logs/' + str(timePoint) + '.csv', 'w+')
+        f.write("tagName;className;location['x'];location['y'];isLink;hasCurrencySIgn;hasPercantage;hasNumber;hasPriceInName;innerText[:100]")
         for i in range(len1 -1):
             try:
                 # f.write(str(self.research.elementsList[i].get_attribute('innerHTML') + "\r\n"))
@@ -122,6 +135,9 @@ class WebExplorer:
                     self.research.ExtractedElements.append(tempEmelent)
                     f.write(tempEmelent.tagName + ';' + str(tempEmelent.className) + ';' + 
                     str(tempEmelent.location['x']) + ';' + str(tempEmelent.location['y']) + ';' + 
+                    str(tempEmelent.isLink) + ';' + 
+                    str(tempEmelent.hasCurrencySIgn) + ';' + str(tempEmelent.hasPercantage) + ';' + 
+                    str(tempEmelent.hasNumber) + ';' + str(tempEmelent.hasPriceInName) + ';' +
                         tempEmelent.innerText[:100] + '\r\n')
             except:
                 self.printOpt('error\r\n')
