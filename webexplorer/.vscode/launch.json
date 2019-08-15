@@ -7,7 +7,8 @@
     "configurations": [
 
         {
-            "name": "__init__.py",
+            // "name": "__init__.py",
+            "name": "Percep01.py",
             "type": "python",
             "request": "launch",
             "program": "${workspaceRoot}/__init__.py",

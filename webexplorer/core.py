@@ -38,12 +38,12 @@ class AppContext(Logger, Config):
     pass
 
 class Element:
-    hasChildren = False
     tagName = ''
     innerHtml = ''
     innerText = ''
     href = ''
     location = ()
+    className = ''
     
 class Research:
     def __init__(self):
@@ -87,19 +87,25 @@ class WebExplorer:
 
     def ProcessElement(self, elem):
         procElem = Element()
-        procElem.Id = elem._id
-        procElem.tagName = elem.tag_name
-        procElem.innerHtml = elem.get_attribute('innerHTML').strip()
-        procElem.innerText = elem.get_attribute('innerText').strip()        
+        procElem.location = elem.location
+        procElem.Childrencount = int(elem.get_attribute('childElementCount'))
+        if procElem.Childrencount > 0 or (procElem.location['x']  == 0 and procElem.location['y'] == 0):
+            return None        
         
+        procElem.innerHtml = elem.get_attribute('innerHTML').strip()
+        if procElem.innerHtml == '':
+            return None
+
+        procElem.tagName = elem.tag_name
+        procElem.innerText = elem.get_attribute('innerText').strip()        
+        procElem.className = elem.get_attribute('className')
         if procElem.tagName == 'a':
             procElem.href = elem.get_attribute('href').strip()
             if self.cfg['Domain'] in procElem.href and '#' not in procElem.href:
                 if procElem.href not in self.links:
-                    self.links.append(procElem.href)
-        nestedElements = elem.find_elements_by_tag_name('*')
-        procElem.Childrencount = nestedElements.__len__()
-        procElem.location = elem.location
+                    self.links.append(procElem.href)        
+        
+        
         return procElem
         
     def SaveToFile(self):
@@ -112,9 +118,10 @@ class WebExplorer:
             try:
                 # f.write(str(self.research.elementsList[i].get_attribute('innerHTML') + "\r\n"))
                 tempEmelent = self.ProcessElement(self.research.elementsList[i])
-                if tempEmelent.location['x']  != 0 and tempEmelent.location['y'] != 0:
+                if tempEmelent is not None: #tempEmelent.location['x']  != 0 and tempEmelent.location['y'] != 0:
                     self.research.ExtractedElements.append(tempEmelent)
-                    f.write(tempEmelent.Id + ';' + tempEmelent.tagName + ';' + str(tempEmelent.Childrencount) + ';' + 
+                    f.write(tempEmelent.tagName + ';' + str(tempEmelent.className) + ';' + 
+                    str(tempEmelent.location['x']) + ';' + str(tempEmelent.location['y']) + ';' + 
                         tempEmelent.innerText[:100] + '\r\n')
             except:
                 self.printOpt('error\r\n')

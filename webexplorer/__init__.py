@@ -1,8 +1,26 @@
 from core import *
 # from centroid import *
-
-if __name__ == "__main__":    
-    # ComputeShow()
+#from Percep01 import *
+from PUM1 import *
+from PUM2 import *
+import matplotlib.pyplot as plt
+import numpy as np
+from sigmoid import *
+from rand1 import *
+if __name__ == "__main__":  
+    if not True:  
+        vievwer1()
+    
+    sig = sigmod()
+    #sig.show()
+    work = Worker()
+    #work.do()
+    #do2()
+    # No2
+    
+    #perceptron = Perceptron()
+    #perceptron.fit(10, 10)
+    #omputeShow()
     appContext = AppContext('config.cfg')
     appContext.GetConfiguration()
     print('URL = ' + appContext.data['Url'])
