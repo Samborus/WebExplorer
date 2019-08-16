@@ -7,6 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 import datetime
 import json
 import pickle
@@ -42,7 +44,8 @@ class Element:
     innerHtml = ''
     innerText = ''
     href = ''
-    location = ()
+    locationX = 0
+    locationY = 0
     className = ''
     hasCurrencySIgn = False
     hasPercantage = False
@@ -92,9 +95,10 @@ class WebExplorer:
 
     def ProcessElement(self, elem):
         procElem = Element()
-        procElem.location = elem.location
+        procElem.locationX = elem.location['x']
+        procElem.locationY = elem.location['y']
         procElem.Childrencount = int(elem.get_attribute('childElementCount'))
-        if procElem.Childrencount > 0 or (procElem.location['x']  == 0 and procElem.location['y'] == 0):
+        if procElem.Childrencount > 0 or (locationX  == 0 and procElem.locationY == 0):
             return None        
         
         procElem.innerHtml = elem.get_attribute('innerHTML').strip()
@@ -126,15 +130,15 @@ class WebExplorer:
         timePoint = datetime.datetime.now()
         self.printOpt('SaveToFile | Start | ' + str(timePoint))
         f = open('logs/' + str(timePoint) + '.csv', 'w+')
-        f.write("tagName;className;location['x'];location['y'];isLink;hasCurrencySIgn;hasPercantage;hasNumber;hasPriceInName;innerText[:100]")
+        f.write("tagName;className;locationX;locationY;isLink;hasCurrencySIgn;hasPercantage;hasNumber;hasPriceInName;innerText[:100]" + '\r\n')
         for i in range(len1 -1):
             try:
-                # f.write(str(self.research.elementsList[i].get_attribute('innerHTML') + "\r\n"))
                 tempEmelent = self.ProcessElement(self.research.elementsList[i])
-                if tempEmelent is not None: #tempEmelent.location['x']  != 0 and tempEmelent.location['y'] != 0:
+                if tempEmelent is not None: 
                     self.research.ExtractedElements.append(tempEmelent)
+                    
                     f.write(tempEmelent.tagName + ';' + str(tempEmelent.className) + ';' + 
-                    str(tempEmelent.location['x']) + ';' + str(tempEmelent.location['y']) + ';' + 
+                    str(tempEmelent.locationX) + ';' + str(tempEmelent.locationY) + ';' + 
                     str(tempEmelent.isLink) + ';' + 
                     str(tempEmelent.hasCurrencySIgn) + ';' + str(tempEmelent.hasPercantage) + ';' + 
                     str(tempEmelent.hasNumber) + ';' + str(tempEmelent.hasPriceInName) + ';' +
@@ -145,7 +149,9 @@ class WebExplorer:
         f.close()
         timePoint = datetime.datetime.now() - timePoint
         self.printOpt('SaveToFile | End | ' + str(timePoint))
-
+        stdsc = StandardScaler()
+        X_train_std = stdsc.fit_transform(self.research.ExtractedElements)
+        X_test_std = stdsc.transform(self.research.ExtractedElements)
     def printOpt(self, text):
         if self.verbose:
             print(text)

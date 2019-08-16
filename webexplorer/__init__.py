@@ -11,7 +11,7 @@ from preprocX import *
 
 if __name__ == "__main__":  
     pre = PreProcX()
-    pre.preGo()
+    #pre.preGo()
     
     if not True:  
         vievwer1()
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     #perceptron = Perceptron()
     #perceptron.fit(10, 10)
     #omputeShow()
-    if not True:
+    if True:
         appContext = AppContext('config.cfg')
         appContext.GetConfiguration()
         print('URL = ' + appContext.data['Url'])
