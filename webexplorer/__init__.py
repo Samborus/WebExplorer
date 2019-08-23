@@ -35,7 +35,8 @@ if __name__ == "__main__":
             print('------------------------------------')
             print('Loop | Start | ' + str(x))                
             program = WebExplorer(appContext, True)
-            program.Go()
+            #program.Go()
+            program.GoCSV()
             timePoint = datetime.datetime.now() - timePoint
             ite = program.links.__len__()
             for x in range(ite):

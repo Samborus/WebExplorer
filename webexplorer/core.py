@@ -21,9 +21,6 @@ class Logger:
         self.logfilePath = logfilePath
     def Info(self, message, data):
         pass
-"""
-dziwne
-"""
 
 class Config:
     def __init__(self, confgfilePath):
@@ -92,7 +89,7 @@ class WebExplorer:
         self.printOpt('browser.get | End | ' + str(timePoint))
         timePoint = datetime.datetime.now()
         self.printOpt('find_elements | Start | ' + str(timePoint))
-        self.research.elementsList = browser.find_elements_by_tag_name('a');        
+        self.research.elementsList = browser.find_elements_by_tag_name('*');        
         timePoint = datetime.datetime.now() - timePoint
         self.printOpt('find_elements | End | ' + str(timePoint))
         
@@ -100,6 +97,11 @@ class WebExplorer:
         self.preprocess()
         self.writeCsv()
         browser.close()
+        pass
+
+    def GoCSV(self):
+        df = pd.read_csv('df.csv')
+        self.preprocess(df)
         pass
 
     def ProcessElement(self, elem):
@@ -116,7 +118,7 @@ class WebExplorer:
 
         procElem.tagName = elem.tag_name
         procElem.innerText = elem.get_attribute('innerText').strip().lower()        
-        procElem.className = elem.get_attribute('className').strip().replace('\n','').replace('\t','').lower()
+        procElem.className = 'class ' + elem.get_attribute('className').strip().replace('\n','').replace('\t','').lower()
         if procElem.tagName == 'a':
             procElem.href = elem.get_attribute('href').strip()
             if self.cfg['Domain'] in procElem.href and '#' not in procElem.href:
@@ -177,13 +179,17 @@ class WebExplorer:
         self.printOpt('ProcessElements | End | ' + str(timePoint))
         pass
 
-    def preprocess(self):
-        df = pd.DataFrame(data = [vars(s) for s in self.research.ExtractedElements], 
-            columns = ['tagName', 'innerHtml','innerText','href','locationX','locationY','className',
+    def preprocess(self, df = None):
+        if df is None:
+            df = pd.DataFrame(data = [vars(s) for s in self.research.ExtractedElements], 
+                columns = ['tagName', 'innerHtml','innerText','href','locationX','locationY','className',
                             'hasCurrencySIgn','hasPercantage','hasNumber','hasPriceInName','isLink',
                             'cssFontSize', 'cssFontStyle', 'cssFontWidth','cssFontColor','cssFontWeight',
                             'cssBgColor','cssHeight',])
-        df.to_csv('df.csv')
+            df.to_csv('df.csv')
+        else:
+            del df['Unnamed: 0']
+
         del df['innerHtml']
         del df['innerText']
         del df['href']
