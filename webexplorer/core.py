@@ -15,6 +15,7 @@ import datetime
 import json
 import pickle
 import pandas as pd
+from html.parser import HTMLParser
 
 class Logger:
     def __init__(self, logfilePath):
@@ -59,6 +60,7 @@ class Element:
     cssFontWeight = ''
     cssBgColor = ''
     cssHeight = ''
+    cssTextDecoration = ''
     
 class Research:
     def __init__(self):
@@ -105,6 +107,7 @@ class WebExplorer:
         pass
 
     def ProcessElement(self, elem):
+        h = HTMLParser()
         procElem = Element()
         procElem.locationX = elem.location['x']
         procElem.locationY = elem.location['y']
@@ -112,15 +115,15 @@ class WebExplorer:
         if childrencount > 0 or (procElem.locationX  == 0 and procElem.locationY == 0):
             return None        
         
-        procElem.innerHtml = elem.get_attribute('innerHTML').strip()
+        procElem.innerHtml = h.unescape(elem.get_attribute('innerHTML')).replace(';','').strip()
         if procElem.innerHtml == '':
             return None
 
         procElem.tagName = elem.tag_name
-        procElem.innerText = elem.get_attribute('innerText').strip().lower()        
-        procElem.className = 'class ' + elem.get_attribute('className').strip().replace('\n','').replace('\t','').lower()
+        procElem.innerText = h.unescape(elem.get_attribute('innerText')).replace(';','').strip().lower()        
+        procElem.className = 'class ' + elem.get_attribute('className').strip().replace('\n','').replace('\t','').replace(';','').lower()
         if procElem.tagName == 'a':
-            procElem.href = elem.get_attribute('href').strip()
+            procElem.href = elem.get_attribute('href').replace(';','').strip()
             if self.cfg['Domain'] in procElem.href and '#' not in procElem.href:
                 if procElem.href not in self.links:
                     self.links.append(procElem.href)        
@@ -146,6 +149,7 @@ class WebExplorer:
         procElem.cssFontWeight = elem.value_of_css_property('font-weight')        
         procElem.cssBgColor = elem.value_of_css_property('background-color')
         procElem.cssHeight = elem.value_of_css_property('height')
+        procElem.cssTextDecoration = elem.value_of_css_property('text-decoration')
         return procElem
         
     def ProcessElements(self):
@@ -185,10 +189,12 @@ class WebExplorer:
                 columns = ['tagName', 'innerHtml','innerText','href','locationX','locationY','className',
                             'hasCurrencySIgn','hasPercantage','hasNumber','hasPriceInName','isLink',
                             'cssFontSize', 'cssFontStyle', 'cssFontWidth','cssFontColor','cssFontWeight',
-                            'cssBgColor','cssHeight',])
+                            'cssBgColor','cssHeight', 'cssTextDecoration'])
             df.to_csv('df.csv')
         else:
             del df['Unnamed: 0']
+
+        X_test = self.GetTestData()
 
         del df['innerHtml']
         del df['innerText']
@@ -203,6 +209,7 @@ class WebExplorer:
         cssFontWeight = {label: idx for idx, label in enumerate(np.unique(df['cssFontWeight'])) }
         cssBgColor = {label: idx for idx, label in enumerate(np.unique(df['cssBgColor'])) }
         cssHeight = {label: idx for idx, label in enumerate(np.unique(df['cssHeight'])) }
+        cssTextDecoration = {label: idx for idx, label in enumerate(np.unique(df['cssTextDecoration'])) }
 
         df['className'] = df['className'].map(classMapping)
         df['tagName'] = df['tagName'].map(tagMapping)
@@ -213,11 +220,53 @@ class WebExplorer:
         df['cssFontWeight'] = df['cssFontWeight'].map(cssFontWeight)
         df['cssBgColor'] = df['cssBgColor'].map(cssBgColor)
         df['cssHeight'] = df['cssHeight'].map(cssHeight)
+        df['cssTextDecoration'] = df['cssTextDecoration'].map(cssTextDecoration)
+
         df[['hasCurrencySIgn','hasPercantage','hasNumber','hasPriceInName','isLink']] *= 1
 
         sc = StandardScaler()
         sc.fit(df)
         X_train_std = sc.transform(df)
+        X_train_std.to_csv('x_train.csv')
+        X_test_std = sc.transform(X_test)
+
+
+        pass
+
+    def GetTestData(self):
+        xt = pd.DataFrame(np.zeros(shape=(1157, 0)))
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
+        xt.at[146, 0] = 1
 
         pass
 

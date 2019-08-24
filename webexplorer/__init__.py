@@ -9,7 +9,7 @@ from sigmoid import *
 from rand1 import *
 from preprocX import *
 
-if __name__ == "__main__":  
+if __name__ == "__main__":      
     pre = PreProcX()
     #pre.preGo()
     
